@@ -3,6 +3,17 @@
 # Exit if any command fails
 set -e
 
+set -e
+
+# Load environment variables from the specific .env file in dev-env
+if [ -f "../dev-env/.env" ]; then
+  export $(cat packages/dev-env/.env | xargs)
+  echo "Loaded environment variables from packages/dev-env/.env"
+else
+  echo "No .env file found in packages/dev-env/.env"
+  exit 1
+fi
+
 get_container_id() {
   local compose_file=$1
   local service=$2
@@ -62,6 +73,7 @@ main_native() {
   local services=${SERVICES}
   local postgres_url_env_var=`[[ $services == *"db_test"* ]] && echo "DB_TEST_POSTGRES_URL" || echo "DB_POSTGRES_URL"`
   local redis_host_env_var=`[[ $services == *"redis_test"* ]] && echo "REDIS_TEST_HOST" || echo "REDIS_HOST"`
+
 
   postgres_url="${!postgres_url_env_var}"
   redis_host="${!redis_host_env_var}"
